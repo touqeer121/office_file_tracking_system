@@ -5,8 +5,8 @@ from django.contrib.auth import authenticate, login
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
 # from django.http import HttpResponse
-# from django.http import HttpResponseRedirect
-# from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
 # from django.shortcuts import resolve_url
 # from django.conf import settings
 # from django.utils.decorators import method_decorator
@@ -94,7 +94,13 @@ class UserFormView(generic.View):
 #             return True
 #         return False
 
+@csrf_exempt
+def user_logout(request):
+    logout(request)
+    messages.success(request, "You have been logged out.")
+    return HttpResponseRedirect('/login/')
 
+@csrf_exempt
 def user_login(request):
     response = {}
     if request.user.is_authenticated:
@@ -114,7 +120,7 @@ def user_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                messages.success(request, 'You are successfully logged in.')
+                messages.success(request, 'You have been successfully logged in.')
                 if is_safe_url(redirect_path, request.get_host()):
                     return redirect(redirect_path)
                 else:
