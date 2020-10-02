@@ -28,7 +28,7 @@ from django.utils.http import is_safe_url
 #     AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm,
 # )
 
-from .admin import UserCreationForm
+from .admin import UserCreationForm, StaffCreationForm
 from django.contrib import messages
 from .models import *
 from django.core.mail import EmailMessage
@@ -38,12 +38,16 @@ def index(request):
     response = {}
     print(request.user, " logged in : RENDER HOME ")
 
-    return render(request, 'home.html', response)
+    if request.user.is_student:
+        return render(request, 'student_home.html', response)
+
+    else:
+        return render(request, 'staff_home.html', response)
 
 
 class UserFormView(generic.View):
     form_class = UserCreationForm
-    template_name = 'accounts/registration_form.html'
+    template_name = 'accounts/student_register.html'
 
     def get(self, request):
         form = self.form_class(None)
@@ -72,6 +76,30 @@ class UserFormView(generic.View):
             #                      f'Your account has been created and you are logged in.Please confirm your email address to complete the registration')
             # except:
             #     messages.success(request, f'Please enter valid email for registration')
+            return redirect('/')
+
+        return render(request, self.template_name, {'form': form})
+
+
+class StaffFormView(generic.View):
+    form_class = StaffCreationForm
+    template_name = 'accounts/staff_register.html'
+
+    def get(self, request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST, request.FILES)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+            print(user)
+            user.is_student = False
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user.set_password(password)
+            user.save()
             return redirect('/')
 
         return render(request, self.template_name, {'form': form})
@@ -133,5 +161,4 @@ def user_login(request):
             response['message'] = 'User is invalid'
 
     return render(request, 'accounts/login.html', response)
-
 

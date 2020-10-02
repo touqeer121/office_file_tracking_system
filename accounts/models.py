@@ -3,6 +3,34 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.urls import reverse
 from django.contrib.auth.password_validation import validate_password
+from django.template.defaultfilters import slugify
+from django.utils.text import slugify
+
+
+class Department(models.Model):
+    name = models.CharField(max_length=255, default='')
+    slug = models.SlugField(max_length=30, unique=True, editable=False)
+    abbreviation = models.CharField(max_length=10, default='')
+    # courses_provided = models.CharField(max_length=10, default='')
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            slug = slugify(self.name)
+            while True:
+                try:
+                    department = Department.objects.get(slug=slug)
+                    if department == self:
+                        self.slug = slug
+                        break
+                    else:
+                        slug = slug + '_'
+                except:
+                    self.slug = slug
+                    break
+        super(Department, self).save()
+
+    def __str__(self):
+        return self.name
 
 
 class CustomUserManager(BaseUserManager):
@@ -29,7 +57,13 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     GENDERS = (('M', 'Male'), ('F', 'Female'))
-
+    ROLE_CHOICES = (
+        ('T', 'Teacher'),
+        ('FA', 'Faculty Advisor'),
+        ('H', 'Head of department'),
+        ('D', 'Dean'),
+        ('A', 'Admin'),
+    )
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=100, blank=True)
@@ -37,14 +71,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     mobile = models.CharField(max_length=10,
                               validators=[RegexValidator(regex=r'[0-9]{10}', message='Invalid Mobile Number')],
                               blank=True)
-    # role = models.CharField(max_length=10)
+    role = models.CharField(max_length=3, choices=ROLE_CHOICES, default='S')
     gender = models.CharField(max_length=1, choices=GENDERS, default='M')
 
     registration_number = models.CharField('Registration number', max_length=7, unique=True,
                                            validators=[RegexValidator(regex=r'[a-zA-Z]{2}[0-9]{5}',
                                             message='Invalid Registration Number')], blank=True, null=True)
+
+    department = models.ForeignKey('Department', verbose_name="Department", on_delete=models.CASCADE, blank=True, null=True)
+
     admin = models.CharField(max_length=1, default='N')
     password = models.CharField('password', max_length=128, validators=[validate_password])
+    is_student = models.BooleanField(default=True, verbose_name='Student')
     is_active = models.BooleanField(default=False, verbose_name='Active',
                                     help_text='Designates whether this user should be treated as active. '
                                               'Unselect this instead of deleting accounts.')

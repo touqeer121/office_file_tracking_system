@@ -26,9 +26,9 @@
                 <div id="uploadForm" class="well well-lg">
                     <formset>
                         {% if user.is_authenticated %}
-                            <legend>Update Profile</legend>
+                            <legend>Update Student Profile</legend>
                         {% else %}
-                            <legend>Register</legend>
+                            <legend>Register Student</legend>
                         {% endif %}
                         <form method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
@@ -51,7 +51,7 @@
                                 </form>
                                 <div class="border-top pt-3">
                                     <small class="text-muted">
-                                        Already Have An Account? <a class="ml-2" href="/content/login">Sign In</a>
+                                        Already Have An Account? <a class="ml-2" href="/student/login">Sign In</a>
                                     </small>
                                 </div>
                             {% endif %}

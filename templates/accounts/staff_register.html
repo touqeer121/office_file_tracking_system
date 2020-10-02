@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Home NIT ADDA{% endblock title %}
+{% load static %}
+{% block content3 %}"../../media/{{ user.image }}"{% endblock content3 %}
+{% block content %}
+    <body>
+    <script>
+        $(document).ready(function () {
+            // messages timeout for 10 sec
+            setTimeout(function () {
+                $('.message_container').fadeOut('slow');
+            }, 3000);
+        });
+    </script>
+    <div class="container" style="min-width:min-content;margin-bottom: 8%">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-warning message_container">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>{{ error }}</strong>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <div class="row" style="margin-top: 2%;">
+            <div class="col-sm-6 col-sm-offset-3">
+                <div id="uploadForm" class="well well-lg">
+                    <formset>
+                        {% if user.is_authenticated %}
+                            <legend>Update Staff Profile</legend>
+                        {% else %}
+                            <legend>Register Staff</legend>
+                        {% endif %}
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {% for field in form %}
+                                    <label class="formText">
+                                        {{ field.label_tag }}
+                                    </label><br>
+                                    {{ field }}
+                                {% endfor %}
+                            </div>
+                            {% if user.is_authenticated %}
+                                <div class="form-group">
+                                    <button class="formButton" type="submit">Update</button>
+                                </div>
+                            {% else %}
+                                <div class="form-group">
+                                    <button class="formButton" type="submit">Sign Up</button>
+                                </div>
+                                </form>
+                                <div class="border-top pt-3">
+                                    <small class="text-muted">
+                                        Already Have An Account? <a class="ml-2" href="/staff/login">Sign In</a>
+                                    </small>
+                                </div>
+                            {% endif %}
+                    </formset>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </body>
+{% endblock content %}
