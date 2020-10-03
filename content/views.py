@@ -100,7 +100,7 @@ def Show_Pending_Approvals(request):
     response = {}
     response['applications'] = applications
     response['departments'] = departments
-    designations = {'T', 'FA', 'DEAN', 'HOD', 'D'}
+    designations = {'Teacher', 'Faculty Advisor', 'Dean', 'Head of Department', 'Director'}
     response['designations'] = designations
     return render(request, 'content/show_pending_approvals.html', response)
 
@@ -126,6 +126,7 @@ def Approve(request):
     app.current_step += 1
     next_id = request.POST.get('names')
     # next = CustomUser.objects.filter(id=next_id)[0]
+    cur = CustomUser.objects.get(pk=app.current_authority)
     app.current_authority = next_id
     if app.current_step>app.max_step:
         print("Got approved")
@@ -133,7 +134,8 @@ def Approve(request):
 
     to_email = app.applicant.email
     subject = 'Application Status Updated.'
-    message = 'Step: '+ app.current_step
+    message = 'Your application status has been updated.It has been approved by Mr./Ms. '+cur.first_name +' '+ \
+              cur.last_name + '(Step '+str(app.current_step-1)+' of '+str(app.max_step)+ ' completed)   .'
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [to_email]
     send_mail( subject, message, email_from, recipient_list)
@@ -154,11 +156,23 @@ def Approve(request):
 @login_required(login_url="/login/")
 def Reject(request):
     app_id = request.POST.get('id_checker')
+    reason = request.POST.get('reason')
     app_id = str(app_id).strip()
     print(app_id)
     app = Application.objects.get(pk=app_id)
     print('Rejected at Step=',app.current_step)
     app.is_rejected = True
+
+    cur = CustomUser.objects.get(pk=app.current_authority)
+    to_email = app.applicant.email
+    subject = 'Application Status Updated.'
+    message = 'Your application status has been rejected.It has been rejected by Mr./Ms. ' + cur.first_name + ' ' + \
+              cur.last_name + '(On step ' + str(app.current_step - 1) + ' of ' + str(app.max_step) + ').\nDue to following' \
+                 'reason : \n ' + str(reason)
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [to_email]
+    send_mail(subject, message, email_from, recipient_list)
+
     app.save()
     applications = Application.objects.all()
     departments = Department.objects.all()
