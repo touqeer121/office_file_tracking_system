@@ -58,11 +58,11 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     GENDERS = (('M', 'Male'), ('F', 'Female'))
     ROLE_CHOICES = (
-        ('T', 'Teacher'),
-        ('FA', 'Faculty Advisor'),
-        ('H', 'Head of department'),
-        ('D', 'Dean'),
-        ('A', 'Admin'),
+        ('Teacher', 'Teacher'),
+        ('Faculty Advisor', 'Faculty Advisor'),
+        ('Dean', 'Dean'),
+        ('Head of department', 'Head of department'),
+        ('Admin', 'Admin'),
     )
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
@@ -71,7 +71,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     mobile = models.CharField(max_length=10,
                               validators=[RegexValidator(regex=r'[0-9]{10}', message='Invalid Mobile Number')],
                               blank=True)
-    role = models.CharField(max_length=3, choices=ROLE_CHOICES, default='S')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='S')
     gender = models.CharField(max_length=1, choices=GENDERS, default='M')
 
     registration_number = models.CharField('Registration number', max_length=7, unique=True,

@@ -183,3 +183,38 @@ def getNames(request):
             json.dumps({"nothing to see": "this isn't happening"}),
             content_type="application/json"
         )
+
+@csrf_exempt
+@login_required_message(message="You should be logged in, in order to perform this")
+@login_required(login_url="/login/")
+def Activate_Users(request):
+    users = CustomUser.objects.all()
+    response = {}
+    response['users'] = users
+    return render(request, 'accounts/activate_users.html', response)
+
+@csrf_exempt
+@login_required_message(message="You should be logged in, in order to perform this")
+@login_required(login_url="/login/")
+def Activate(request, uid):
+    user = CustomUser.objects.get(pk=uid)
+    user.is_active = True
+    user.save()
+    response = {}
+    users = CustomUser.objects.all()
+    response['users'] = users
+    print("activate")
+    return render(request, 'accounts/activate_users.html', response)
+
+@csrf_exempt
+@login_required_message(message="You should be logged in, in order to perform this")
+@login_required(login_url="/login/")
+def Deactivate(request, uid):
+    user = CustomUser.objects.get(pk=uid)
+    user.is_active = False
+    user.save()
+    response = {}
+    users = CustomUser.objects.all()
+    response['users'] = users
+    print("deactivate")
+    return render(request, 'accounts/activate_users.html', response)

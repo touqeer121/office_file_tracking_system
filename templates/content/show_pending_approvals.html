@@ -101,6 +101,40 @@
 
             </div>
           </div>
+
+    <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Please specify the reason to reject.</h4>
+                </div>
+                <div class="modal-body">
+                 <form method="POST" action="{%  url 'content:Reject' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                     <div class="form-group">
+                         <input type="hidden" name="id_checker" id="idChecker2" value="0">
+                        <label class="formText">Reason</label>
+                        <textarea class="form-control" id="reason_textbox" name="reason" required>
+                        </textarea>
+                    </div>
+                    <center>
+                        <button type="submit" id="btn" class="formButton" style="height:40px; width: 120px; padding:0px 10px">Reject</button>
+                    </center>
+
+                 </form>
+
+
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
         <div>
             <table class="table table-striped dt-responsive table-responsive-md" id="display_table">
                 <thead class="thead-dark">
@@ -117,7 +151,6 @@
                 </thead>
                 <tbody>
 
-
                 {% for i in applications %}
 
                     <tr>
@@ -127,14 +160,20 @@
                         <td style="vertical-align:middle">{{ i.title }}</td>
                         {% if i.is_approved %}
                             <td style="vertical-align:middle;color:green">Approved</td>
+                        {% elif i.is_rejected %}
+                            <td style="vertical-align:middle;color:red">Rejected</td>
                         {% else %}
-                            <td style="vertical-align:middle;color:blue">Pending {{ i.current_authority }}</td>
+                            <td style="vertical-align:middle;color:blue">Awaiting {{ i.current_authority.first_name }}'s Approval<br>
+                                            (Step {{ i.current_step }} of {{ i.max_step }})
+                            </td>
                         {% endif %}
                         <td style="vertical-align:middle"><a href="../../media/{{ i.attached_pdf }}">View</a></td>
-                        {% if user.is_authenticated and user.id == i.current_authority and not i.is_approved  %}
+                        {% if user.is_authenticated and user.id == i.current_authority and not i.is_approved and not i.is_rejected%}
                             <td scope="col">
                                 <a id="{{ i.app_id }}" class="btn btn-success"data-toggle="modal" data-target="#myModal"
                                        onclick="return approveButtonClicked(this.id)">Approve</a>
+                                <a id="{{ i.app_id }}1" class="btn btn-danger"data-toggle="modal" data-target="#myModal2"
+                                       onclick="return rejectButtonClicked(this.id)">Reject</a>
                             </td>
                         {% else %}
                             <td style="vertical-align:middle;color:red">N/A</td>
@@ -150,6 +189,13 @@
             function approveButtonClicked (appid) {
                 console.log("ID=",appid)
                 document.getElementById("idChecker").value = appid;
+                return true;
+            }
+            function rejectButtonClicked (appid) {
+                console.log("before ID=",appid)
+                appid = appid.slice(0, -1)
+                console.log("after ID=",appid)
+                document.getElementById("idChecker2").value = appid;
                 return true;
             }
         </script>

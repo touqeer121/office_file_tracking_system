@@ -41,7 +41,7 @@
         {% endfor %}
     {% endif %}
     <div class="row main_header" style="text-align: center">
-        <h2>Track your application by Reference ID</h2>
+        <h2>Track application by Reference ID</h2>
         <form method="POST" action="{%  url 'content:Track_Application' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group" style="width: 40%; margin: 25px auto">
@@ -55,7 +55,7 @@
         </form>
     </div>
 
-    {% if application%}
+    {% if application %}
         <div class="container" >
         <div>
             <table class="table table-striped dt-responsive table-responsive-md" id="display_table">
@@ -66,6 +66,9 @@
                     <th scope="col">Title</th>
                     <th scope="col">Status</th>
                     <th scope="col">Attached Documents</th>
+                    {% if not user.is_student %}
+                        <th scope="col">Actions</th>
+                    {% endif %}
                 </tr>
                 </thead>
                 <tbody>
@@ -77,9 +80,26 @@
                     {% if application.is_approved %}
                         <td style="vertical-align:middle;color:green">Approved</td>
                     {% else %}
-                        <td style="vertical-align:middle;color:blue">Pending {{ application.current_authority }}</td>
+                        <td style="vertical-align:middle;color:blue">Awaiting {{auth.role}}'s approval <br>(Step {{application.current_step}} of {{application.max_step}})</td>
                     {% endif %}
                     <td style="vertical-align:middle"><a href="../../media/{{ application.attached_pdf }}">View</a></td>
+
+                    {% if not user.is_student %}
+                        {% if user.is_authenticated and user.id == application.current_authority %}
+                            {% if application.is_approved  %}
+                                <td style="vertical-align:middle;color:red">N/A</td>
+                            {% else %}
+                            <td scope="col">
+                                <a id="{{ i.app_id }}" class="btn btn-success"data-toggle="modal" data-target="#myModal"
+                                       onclick="return approveButtonClicked(this.id)">Approve</a>
+                                <a id="{{ i.app_id }}1" class="btn btn-danger"data-toggle="modal" data-target="#myModal"
+                                           onclick="return rejectButtonClicked(this.id)">Reject</a>
+                            </td>
+                            {% endif %}
+                        {% else %}
+                            <td style="vertical-align:middle;color:red">N/A</td>
+                        {% endif %}
+                    {% endif %}
                 </tr>
                 </tbody>
             </table>

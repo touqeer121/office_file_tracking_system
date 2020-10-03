@@ -143,6 +143,36 @@
 <header>
     <nav style="margin-bottom: 50px; background-color:#343a40;font-size: 14px;z-index: 1000;"
          class="navbar  ">
+        {%  if not user.is_authenticated %}
+        <div class="container-fluid">
+            <a id="nitadda" href="#" class="navbar-brand faa-pulse faa-slow animated" data-toggle="popover"
+               data-trigger="focus" data-html="true" data-placement="bottom">
+                <i class="fa fa-lg"><strong><span style="font-family: 'Product Sans',sans-serif;font-size:40px;"><span
+                        class="g-blue">N</span><span
+                        class="g-blue">I</span><span
+                        class="g-blue">T</span><span
+                        class="g-blue">W</span></span></strong></i>
+            </a>
+            <div id="navbar1" class="navbar-collapse collapse">
+                <ul id="mynav" class="nav navbar-nav">
+                    <li class="active" {% if request.path == '/' %}style="background: #ffd13d"{% endif %}>
+                        <a class="faa-parent animated-hover" href="/"
+                            {% if request.path == '/' %}style="color: #146471;"{% endif %}>
+                            Home
+                        </a>
+                    </li>
+                </ul>
+                <ul id="rightnav" class="nav navbar-nav navbar-right">
+                    <li {% if request.path == '/login/' %}style="background: #ffd13d"{% endif %}>
+                        <a class="faa-parent animated-hover" href="/login">
+                            <i class="fa fa-fw fa-lg fa-sign-in faa-tada faa-fast"></i>Login
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {% else %}
         {% if request.user.is_student %}
             <div class="container-fluid">
             <a id="nitadda" href="#" class="navbar-brand faa-pulse faa-slow animated" data-toggle="popover"
@@ -246,6 +276,21 @@
                             Track Student Applications
                         </a>
                     </li>
+
+                    {%  if user.role == "Admin" %}
+                    <li class="active" {% if request.path == '/activate_users/' %}style="background: #ffd13d"{% endif %}>
+                        <a class="faa-parent animated-hover" href="{% url 'accounts:Activate_Users'%}"
+                            {% if request.path == '/activate_users/' %}style="color: #146471;"{% endif %}>
+                            Activate Users
+                        </a>
+                    </li>
+                    <li class="active" {% if request.path == '/add_scholarship/' %}style="background: #ffd13d"{% endif %}>
+                        <a class="faa-parent animated-hover" href="{% url 'content:Add_Scholarship'%}"
+                            {% if request.path == '/add_scholarship/' %}style="color: #146471;"{% endif %}>
+                            Add Scholarship
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
                 <ul id="rightnav" class="nav navbar-nav navbar-right">
                     {% if user.is_authenticated %}
@@ -273,6 +318,7 @@
                 </ul>
             </div>
         </div>
+        {% endif %}
         {% endif %}
     </nav>
 </header>

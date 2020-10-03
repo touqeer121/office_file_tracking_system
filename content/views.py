@@ -6,6 +6,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 import datetime
 from accounts.models import Department
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail
+from django.conf import settings
 
 @csrf_exempt
 def checkuserifscrutinyuser(user):
@@ -126,20 +131,71 @@ def Approve(request):
         print("Got approved")
         app.is_approved = True
 
+    to_email = app.applicant.email
+    subject = 'Application Status Updated.'
+    message = 'Step: '+ app.current_step
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [to_email]
+    send_mail( subject, message, email_from, recipient_list)
+
     app.save()
     applications = Application.objects.all()
     departments = Department.objects.all()
     response = {}
     response['applications'] = applications
     response['departments'] = departments
-    designations = {'T', 'FA', 'DEAN', 'HOD', 'D'}
+    designations = {'Teacher', 'Faculty Advisor', 'Dean', 'Head of Department', 'Director'}
     response['designations'] = designations
     return render(request, 'content/show_pending_approvals.html', response)
+
+
+@csrf_exempt
+@login_required_message(message="You should be logged in, in order to perform this")
+@login_required(login_url="/login/")
+def Reject(request):
+    app_id = request.POST.get('id_checker')
+    app_id = str(app_id).strip()
+    print(app_id)
+    app = Application.objects.get(pk=app_id)
+    print('Rejected at Step=',app.current_step)
+    app.is_rejected = True
+    app.save()
+    applications = Application.objects.all()
+    departments = Department.objects.all()
+    response = {}
+    response['applications'] = applications
+    response['departments'] = departments
+    designations = {'Teacher', 'Faculty Advisor', 'Dean', 'Head of Department', 'Director'}
+    response['designations'] = designations
+    return render(request, 'content/show_pending_approvals.html', response)
+
 
 @csrf_exempt
 @login_required_message(message="You should be logged in, in order to perform this")
 @login_required(login_url="/login/")
 def Track_Application(request):
+    if request.POST:
+        app_id = request.POST.get('app_id')
+        application = Application.objects.filter(app_id=app_id)
+        for a in application:
+            print(a.app_id)
+        auth = CustomUser.objects.get(pk=application[0].current_authority)
+        response = {
+            'application': application[0],
+            'auth' : auth
+        }
+
+    else:
+        response = {
+            'application': None,
+            'auth': None
+        }
+    return render(request, 'application/track_application.html', response)
+
+@csrf_exempt
+@login_required_message(message="You should be logged in, in order to perform this")
+@login_required(login_url="/login/")
+def Track_Student_Applications(request):
     if request.POST:
         app_id = request.POST.get('app_id')
         application = Application.objects.filter(app_id=app_id)
@@ -157,5 +213,14 @@ def Track_Application(request):
 @csrf_exempt
 @login_required_message(message="You should be logged in, in order to perform this")
 @login_required(login_url="/login/")
-def Track_Student_Applications(request):
-    pass
+def Add_Scholarship(request):
+    user = CustomUser.objects.get(pk=request.user.id)
+    response = {}
+    if user.role == "Admin":
+        return render(request, 'content/add_scholarship.html', response)
+    else:
+        if user.is_student:
+            return render(request, 'student_home.html', response)
+        else:
+            return render(request, 'staff_home.html', response)
+

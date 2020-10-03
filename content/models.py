@@ -62,6 +62,7 @@ class Application(models.Model):
     current_step = models.IntegerField(default="0")
     max_step = models.IntegerField(default="1")
     is_approved = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
     def __unicode__(self):
         return str(self.app_id)
 

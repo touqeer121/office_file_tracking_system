@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content3 %}"../media/{{ user.image }}"{% endblock content3 %}
+{% block content4 %}"../media/{{ user.image }}"{% endblock content4 %}
+{% block content %}
+    <body>
+    {% if messages %}
+        {% for mes in messages %}
+            <div class="alert alert-success message_container">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{ mes }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row main_header" style="text-align: center">
+        <h2>All Users</h2>
+    </div>
+
+    <div class="container" >
+        <div>
+            <table class="table table-striped dt-responsive table-responsive-md" id="display_table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">S. No.</th>
+                    <th scope="col">User ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Designation</th>
+                    <th scope="col">Actions</th>
+
+                </tr>
+                </thead>
+                <tbody>
+
+
+                {% for i in users %}
+
+                    <tr>
+                        <td style="vertical-align:middle">{{ forloop.counter }}</td>
+                        <td style="vertical-align:middle; ">{{ i.id}}</td>
+                        <td style="vertical-align:middle">{{ i.first_name }} {{ i.last_name }}</td>
+                        {%  if i.is_student %}
+                            <td style="vertical-align:middle">Student</td>
+                        {% else %}
+                            <td style="vertical-align:middle">{{ i.role }}</td>
+                        {%  endif %}
+                        {% if i.is_active %}
+                            <td style="vertical-align:middle"><a class="btn btn-danger" href="{% url 'accounts:Deactivate' i.id %}">Dectivate</a></td>
+                        {% else %}
+                            <td style="vertical-align:middle"><a class="btn btn-success" href="{% url 'accounts:Activate' i.id %}">Activate</a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+        <script type="text/javascript">
+            function approveButtonClicked (appid) {
+                console.log("ID=",appid)
+                document.getElementById("idChecker").value = appid;
+                return true;
+            }
+        </script>
+    </body>
+
+{% endblock content %}
