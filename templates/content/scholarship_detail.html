@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Home NIT ADDA{% endblock title %}
+{% load static %}
+{% block content3 %}"../media/{{ user.image }}"{% endblock content3 %}
+{% block content4 %}"../media/{{ user.image }}"{% endblock content4 %}
+{% block content %}
+    <body>
+    {% if messages %}
+        {% for mes in messages %}
+            <div class="alert alert-success message_container">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{ mes }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row main_header" style="text-align: center">
+        <h2>{{ scholarship.name }}</h2>
+        <div class="container" style="margin-bottom: 50px">
+            <div class="col-sm-6 col-sm-offset-3" >
+                {% if alreadyApplied %}
+                    <div id="uploadForm" class="well well-lg" style="text-align: center; font-size:20px;">
+                        You have already applied here.
+                        <div style="color:red">Your Application ID  is : <b>{{ app_id }}</b></div>
+                    </div>
+                {% else %}
+                <div id="uploadForm" class="well well-lg">
+                    <legend>Application for {{ scholarship.name }}</legend>
+                    <form method="POST" action="/content/apply/">
+                        {% csrf_token %}
+                        <input type="hidden" name="application_type" id="type_checker" value="scholarship">
+                        <input type="hidden" name="scholarship_id" id="id_checker" value="{{scholarship.id}}">
+
+                        <div class="form-group">
+                            <label class="formText" for="password1">Upload Documents</label>
+                             <input class="form-control" type="file" id="uploadedFiles" name="up_files" required>
+                        </div>
+
+                        <center>
+                            <button type="submit" id="btn"  class="formButton">Apply</button>
+                        </center>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+
+{% endblock content %}

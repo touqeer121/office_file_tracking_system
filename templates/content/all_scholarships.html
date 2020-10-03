@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Home NIT ADDA{% endblock title %}
+{% load static %}
+{% block content3 %}"../media/{{ user.image }}"{% endblock content3 %}
+{% block content4 %}"../media/{{ user.image }}"{% endblock content4 %}
+{% block content %}
+    <head>
+        <script src="https://kit.fontawesome.com/57456f662e.js" crossorigin="anonymous"></script>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    </head>
+    <body>
+
+        <div class="site-section">
+            <div class="container">
+                <div>
+                    <table class="table table-striped dt-responsive table-responsive-md" id="display_table">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">S. No.</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in scholarships %}
+                            <tr>
+                                <td style="vertical-align:middle">{{ forloop.counter }}</td>
+                                <td style="vertical-align:middle">{{ i.name }}</td>
+                                {% if user.is_authenticated and user.is_superuser %}
+                                    <td scope="col">
+                                        {% if  i.is_approved %}
+                                            <a class="btn">Approved</a>
+                                        {% else %}
+{#                                            ../approvebook/{{ i.book_id }}#}
+                                            <a href=""
+                                               class="btn btn-danger">Approve</a>
+                                        {% endif %}
+{#                                        ../deletebook/{{ i.book_id }}#}
+                                        <a href="" class="btn btn-danger">Remove</a>
+                                    </td>
+                                {% else %}
+                                    <td scope="col">
+                                            <a style="font-weight: bold"
+                                               href="/content/scholarships/{{ i.id }}"
+                                               class="btn btn-info">
+                                                Apply</a>
+                                    </td>
+                                {% endif %}
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+
+{% endblock content %}

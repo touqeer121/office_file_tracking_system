@@ -5,8 +5,10 @@ from django.contrib.auth import authenticate, login
 from django.views import generic
 from django.contrib.auth import authenticate, login, logout
 # from django.http import HttpResponse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+import  json
+from content.decorators import login_required_message
 # from django.shortcuts import resolve_url
 # from django.conf import settings
 # from django.utils.decorators import method_decorator
@@ -37,8 +39,9 @@ from django.core.mail import EmailMessage
 def index(request):
     response = {}
     print(request.user, " logged in : RENDER HOME ")
-
-    if request.user.is_student:
+    user = CustomUser.objects.filter(id=request.user.id)
+    print("User : ",user)
+    if not user or (user and user[0].is_student):
         return render(request, 'student_home.html', response)
 
     else:
@@ -79,7 +82,6 @@ class UserFormView(generic.View):
             return redirect('/')
 
         return render(request, self.template_name, {'form': form})
-
 
 class StaffFormView(generic.View):
     form_class = StaffCreationForm
@@ -162,3 +164,22 @@ def user_login(request):
 
     return render(request, 'accounts/login.html', response)
 
+@csrf_exempt
+def getNames(request):
+    print("INSIDE GET NAMES")
+    if request.method == 'POST':
+        designation = request.POST.get('d')
+        result_set = []
+        trimmed_role= str(designation).strip()
+        all_users = CustomUser.objects.filter(role=trimmed_role, is_student=False)
+        print('..',trimmed_role,'..')
+        for user in all_users:
+            print(user.first_name,' ', user.id)
+            result_set.append({'first_name': user.first_name,'last_name': user.last_name, 'id': user.id})
+        return HttpResponse(json.dumps(result_set), content_type='application/json')
+
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_type="application/json"
+        )

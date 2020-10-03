@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content3 %}"../media/{{ user.image }}"{% endblock content3 %}
+{% block content4 %}"../media/{{ user.image }}"{% endblock content4 %}
+{% block content %}
+    <head>
+        <script>
+            $(document).ready(function () {
+                $('select#selectDesignation').change(function () {
+                    let optionSelected = $(this).find("option:selected");
+                    {#let valueSelected  = optionSelected.val();#}
+                    let designation_title = optionSelected.text();
+                    console.log("Designation selected is :", designation_title);
+                    $.ajax({
+                        url: "/accounts/getNames/",
+                        type: "POST",
+                        data: {'d': designation_title},
+                        success: function (names) {
+                            $("#selectNames option").remove();
+                            $("#selectNames").append("<option selected disabled>Choose Name</option>");
+                            for (var i = names.length - 1; i >= 0; i--) {
+                                {
+                                    console.log(names[i].id + "   ");
+                                }
+                                $("#selectNames").append("<option value=" + names[i].id + ">" + names[i].first_name+" "+
+                                    names[i].last_name+ "</option>");
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+    </head>
+    <body>
+    {% if messages %}
+        {% for mes in messages %}
+            <div class="alert alert-success message_container">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{ mes }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row main_header" style="text-align: center">
+        <h2>All Pending Approvals</h2>
+    </div>
+
+    <div class="container" >
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Choose the next Authority to approve.</h4>
+                </div>
+                <div class="modal-body">
+                 <form method="POST" action="{%  url 'content:Approve' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="hidden" name="id_checker" id="idChecker" value="0">
+                        <label class="formText">Select Department</label>
+                        <select class="form-control" id="selectDepartment" name="departments" required>
+                            <option selected disabled>Choose department</option>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}">
+                                    {{ department.name }}, ({{ department.abbreviation }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="formText">Select Designation</label>
+                        <select class="form-control" id="selectDesignation" name="roles" required>
+                            <option selected disabled>Choose designation</option>
+                            {% for designation in designations %}
+                                <option value="{{ designation }}">
+                                    {{ designation }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="formText">Select Name</label>
+                        <select class="form-control" id="selectNames" name="names" required>
+                            <option selected disabled>Choose name</option>
+                        </select>
+                    </div>
+                    <center>
+                        <button type="submit" id="btn" class="formButton" style="height:40px; width: 120px; padding:0px 10px">Approve and redirect</button>
+                    </center>
+
+                 </form>
+
+
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        <div>
+            <table class="table table-striped dt-responsive table-responsive-md" id="display_table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">S. No.</th>
+                    <th scope="col">Application ID</th>
+                    <th scope="col">Applicant Name</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Attached Documents</th>
+                    <th scope="col">Actions</th>
+
+                </tr>
+                </thead>
+                <tbody>
+
+
+                {% for i in applications %}
+
+                    <tr>
+                        <td style="vertical-align:middle">{{ forloop.counter }}</td>
+                        <td style="vertical-align:middle; ">{{ i.app_id}}</td>
+                        <td style="vertical-align:middle">{{ i.applicant.first_name }} {{ i.applicant.last_name }}</td>
+                        <td style="vertical-align:middle">{{ i.title }}</td>
+                        {% if i.is_approved %}
+                            <td style="vertical-align:middle;color:green">Approved</td>
+                        {% else %}
+                            <td style="vertical-align:middle;color:blue">Pending {{ i.current_authority }}</td>
+                        {% endif %}
+                        <td style="vertical-align:middle"><a href="../../media/{{ i.attached_pdf }}">View</a></td>
+                        {% if user.is_authenticated and user.id == i.current_authority and not i.is_approved  %}
+                            <td scope="col">
+                                <a id="{{ i.app_id }}" class="btn btn-success"data-toggle="modal" data-target="#myModal"
+                                       onclick="return approveButtonClicked(this.id)">Approve</a>
+                            </td>
+                        {% else %}
+                            <td style="vertical-align:middle;color:red">N/A</td>
+                        {% endif %}
+
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+        <script type="text/javascript">
+            function approveButtonClicked (appid) {
+                console.log("ID=",appid)
+                document.getElementById("idChecker").value = appid;
+                return true;
+            }
+        </script>
+    </body>
+
+{% endblock content %}

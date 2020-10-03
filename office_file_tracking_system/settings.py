@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
-    'application',
+    'content',
 ]
 
 MIDDLEWARE = [
@@ -118,6 +118,7 @@ STATICFILES_DIRS = (
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+TEMP_ROOT = os.path.join(BASE_DIR, 'media/tmp')
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
